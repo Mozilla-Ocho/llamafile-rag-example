@@ -1,0 +1,7 @@
+beautifulsoup4
+click
+faiss-cpu
+numpy
+packaging
+python-dotenv
+requests

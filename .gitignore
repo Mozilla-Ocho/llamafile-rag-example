@@ -1,0 +1,11 @@
+.python-version
+.idea
+venv/
+__pycache__
+# project
+.env
+index-toy/
+local_data/
+models/
+logs/
+.pid_*
