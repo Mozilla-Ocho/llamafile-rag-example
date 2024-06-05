@@ -6,10 +6,9 @@ import numpy as np
 def tokenize(
     text: str,
     base_url_prefix: str = "http://localhost",
-    port: int = 8080,
 ) -> list[int]:
     response = requests.post(
-        url=f"{base_url_prefix}:{port}/tokenize",
+        url=f"{base_url_prefix}:{settings.EMBEDDING_MODEL_PORT}/tokenize",
         headers={"Content-Type": "application/json"},
         json={
             "content": text,
@@ -22,10 +21,9 @@ def tokenize(
 def detokenize(
     tokens: list[int],
     base_url_prefix: str = "http://localhost",
-    port: int = 8080,
 ) -> str:
     response = requests.post(
-        url=f"{base_url_prefix}:{port}/detokenize",
+        url=f"{base_url_prefix}:{settings.EMBEDDING_MODEL_PORT}/detokenize",
         headers={"Content-Type": "application/json"},
         json={
             "tokens": tokens,
