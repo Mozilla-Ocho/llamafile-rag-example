@@ -1,22 +1,32 @@
 import json
 import logging
-import re
 import traceback
 from pathlib import Path
 from typing import Iterator
 
+import PyPDF2
 import click
 import faiss
 import numpy as np
 import requests
 from bs4 import BeautifulSoup
-
-import settings
-import llamafile_client as llamafile
-
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+import llamafile_client as llamafile
+import settings
+
 logger = logging.getLogger(__name__)
+
+
+def load_pdf(path: str) -> str:
+    with open(path, "rb") as f:
+        reader = PyPDF2.PdfReader(f)
+        text = []
+
+        for page in reader.pages:
+            text.append(page.extract_text())
+
+        return "".join(text)
 
 
 def chunk_text(text: str) -> Iterator[str]:
@@ -57,6 +67,10 @@ def load_data_for_indexing() -> Iterator[str]:
                 text = f.read()
                 for chunk in chunk_text(text):
                     yield chunk
+        for path in Path(directory).rglob("*.pdf"):
+            text = load_pdf(str(path))
+            for chunk in chunk_text(text):
+                yield chunk
 
 
 def embed(text: str) -> np.ndarray:
