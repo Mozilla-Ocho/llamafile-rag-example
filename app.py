@@ -132,8 +132,6 @@ def run_query(k: int, index: faiss.IndexFlatIP, docs: list[str]):
     query = click.prompt(
         text="Enter query (ctrl-d to quit):",
         prompt_suffix="> ",
-        default="What does Alice like?",
-        show_default=True,
     )
 
     print("=== Query ===")
