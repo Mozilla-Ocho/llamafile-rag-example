@@ -5,3 +5,4 @@ numpy
 packaging
 python-dotenv
 requests
+langchain-text-splitters

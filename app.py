@@ -14,6 +14,8 @@ from bs4 import BeautifulSoup
 import settings
 import llamafile_client as llamafile
 
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,10 +25,17 @@ def chunk_text(text: str) -> Iterator[str]:
     else:
         chunk_len = settings.EMBEDDING_MODEL_MAX_LEN
 
-    text = re.sub(r"\s+", " ", text)
-    tokens = llamafile.tokenize(text, port=settings.EMBEDDING_MODEL_PORT)
-    for i in range(0, len(tokens), chunk_len):
-        yield llamafile.detokenize(tokens[i : i + chunk_len])
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_len,
+        chunk_overlap=40,
+        length_function=len,
+        is_separator_regex=False,
+    )
+
+    chunks = text_splitter.split_text(text)
+
+    for chunk in chunks:
+        yield chunk
 
 
 def load_data_for_indexing() -> Iterator[str]:
@@ -102,7 +111,7 @@ def pprint_search_results(scores: np.ndarray, doc_indices: np.ndarray, docs: lis
     print()
 
 
-SEP = "-"*80
+SEP = "-" * 80
 
 
 def run_query(k: int, index: faiss.IndexFlatIP, docs: list[str]):
