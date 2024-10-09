@@ -120,9 +120,13 @@ def load_index():
 
 def pprint_search_results(scores: np.ndarray, doc_indices: np.ndarray, docs: list[str]):
     print("=== Search Results ===")
-    for i, doc_ix in enumerate(doc_indices[0]):
-        print('%.4f - "%s"' % (scores[0, i], docs[doc_ix][:100]))
+    try:
+        for i, doc_ix in enumerate(doc_indices[0]):
+            print('%.4f - "%s"' % (scores[0, i], docs[doc_ix][:100]))
+    except IndexError:
+        print("No results found.")
     print()
+    return
 
 
 SEP = "-" * 80
@@ -142,7 +146,10 @@ def run_query(k: int, index: faiss.IndexFlatIP, docs: list[str]):
     emb = embed(query)
     scores, doc_indices = index.search(emb, k)
     pprint_search_results(scores, doc_indices, docs)
-    search_results = [docs[ix] for ix in doc_indices[0]]
+    try:
+        search_results = [docs[ix] for ix in doc_indices[0]]
+    except IndexError:
+        search_results = []
 
     print("=== Prompt ===")
     prompt_template = (
