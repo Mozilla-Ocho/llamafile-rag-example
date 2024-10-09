@@ -173,6 +173,8 @@ def run_query(k: int, index: faiss.IndexFlatIP, docs: list[str]):
         "Context information:\n"
         "%s\n"
         "Query: %s"
+        "\n"
+        "Answer: "
     )
     prompt = prompt_template % ("\n".join(search_results), query)
     print(f'"{prompt}"')
