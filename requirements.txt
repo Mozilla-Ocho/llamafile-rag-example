@@ -7,3 +7,4 @@ python-dotenv
 requests
 langchain-text-splitters
 PyPDF2
+checksumdir

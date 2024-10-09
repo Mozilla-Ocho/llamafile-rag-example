@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Iterator
 
 import PyPDF2
+import checksumdir
 import click
 import faiss
 import numpy as np
@@ -84,8 +85,17 @@ def embed(text: str) -> np.ndarray:
 def build_index():
     savedir = Path(settings.INDEX_SAVE_DIR)
     if savedir.exists():
-        logger.info("index already exists @ %s, will not overwrite", savedir)
-        return
+        if (savedir / "last_hash.txt").exists():
+            with open(savedir / "last_hash.txt", "r") as fin:
+                for d in settings.INDEX_LOCAL_DATA_DIRS:
+                    if d not in fin.read():
+                        logger.warning("index dir hash mismatch, rebuilding index")
+                        break
+                    else:
+                        logger.info("index already exists, skipping")
+                        return
+        else:
+            logger.warning("index dir hash file not found, rebuilding index")
 
     embedding_dim = llamafile.embed("Apples are red.").shape[-1]
 
@@ -99,10 +109,16 @@ def build_index():
         index.add(embedding)
         docs.append(text)
 
-    savedir.mkdir(parents=True)
+    savedir.mkdir(parents=True, exist_ok=True)
     faiss.write_index(index, str(savedir / "index.faiss"))
     with open(savedir / "index.json", "w") as fout:
         json.dump(docs, fout)
+
+    with open(savedir / "last_hash.txt", "w") as fout:
+        for d in settings.INDEX_LOCAL_DATA_DIRS:
+            fout.write(checksumdir.dirhash(d, 'sha256'))
+    logger.info("index with %d entries saved to %s", index.ntotal, savedir)
+    return
 
 
 def load_index():
